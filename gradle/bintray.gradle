@@ -1,0 +1,54 @@
+if (System.env.BINTRAY_USER && System.env.BINTRAY_KEY) {
+	publishing {
+		publications {
+			mavenJava(MavenPublication) {
+				from components.java
+				artifact sourcesJar {
+					classifier "sources"
+				}
+				artifact javadocJar {
+					classifier "javadoc"
+				}
+				pom.withXml {
+					asNode().children().last() + {
+						resolveStrategy = Closure.DELEGATE_FIRST
+						name project.name
+						description project.description
+						inceptionYear "2019"
+						licenses {
+							license {
+								name "The Apache Software License, Version 2.0"
+								url "http://www.apache.org/license/LICENSE-2.0.txt"
+								distribution "repo"
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	bintray {
+		user = System.env.BINTRAY_USER
+		key = System.env.BINTRAY_KEY
+		publications = ["mavenJava"]
+		dryRun = System.env.CIRCLE_BRANCH != "master"
+		publish = true
+		pkg {
+			userOrg = "ws2ten1"
+			repo = "maven-release"
+			name = project.name
+			desc = project.description
+			websiteUrl = "https://github.com/ws2ten1/ws2ten1-template"
+			issueTrackerUrl = "https://github.com/ws2ten1/ws2ten1-template/issues"
+			vcsUrl = "https://github.com/ws2ten1/ws2ten1-template.git"
+			licenses = ["Apache-2.0"]
+			labels = ["ws2ten1", "Spring framework"]
+			githubRepo = 'ws2ten1/ws2ten1-template'
+			version {
+				name = project.version
+				vcsTag = project.version
+			}
+		}
+	}
+}
