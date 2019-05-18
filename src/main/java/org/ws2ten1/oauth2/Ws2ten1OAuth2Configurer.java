@@ -47,6 +47,8 @@ public class Ws2ten1OAuth2Configurer<H extends HttpSecurityBuilder<H>>
 	
 	private String introspectionClientSecret;
 	
+	private boolean disableIntrospectionProvider;
+	
 	private List<AuthenticationProvider> additionalProviders = new ArrayList<>();
 	
 	
@@ -94,6 +96,11 @@ public class Ws2ten1OAuth2Configurer<H extends HttpSecurityBuilder<H>>
 				introspectionClientId, introspectionClientSecret);
 	}
 	
+	public Ws2ten1OAuth2Configurer<H> disableIntrospectionProvider() {
+		disableIntrospectionProvider = true;
+		return this;
+	}
+	
 	public Ws2ten1OAuth2Configurer<H> addAuthenticationProvider(AuthenticationProvider authenticationProvider) {
 		additionalProviders.add(authenticationProvider);
 		return this;
@@ -110,7 +117,9 @@ public class Ws2ten1OAuth2Configurer<H extends HttpSecurityBuilder<H>>
 		filter.setAuthenticationEntryPoint(authenticationEntryPoint);
 		builder.addFilter(postProcess(filter));
 		
-		builder.authenticationProvider(getProvider());
+		if (disableIntrospectionProvider == false) {
+			builder.authenticationProvider(getProvider());
+		}
 		additionalProviders.forEach(builder::authenticationProvider);
 	}
 }
