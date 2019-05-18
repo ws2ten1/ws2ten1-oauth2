@@ -60,10 +60,19 @@ repositories {
 	jcenter()
 	mavenCentral()
 	maven { url 'https://dl.bintray.com/ws2ten1/maven-release' }
+	maven { url 'http://repo.spring.io/milestone' }
 }
 
 dependencies {
-	api 'org.slf4j:slf4j-api'
+	api 'org.springframework:spring-web'
+	api 'org.springframework.security:spring-security-core:5.2.0.M2'
+	api 'org.springframework.security:spring-security-config:5.2.0.M2'
+	api 'org.springframework.security:spring-security-oauth2-core:5.2.0.M2'
+	api 'org.springframework.security:spring-security-oauth2-resource-server:5.2.0.M2'
+	implementation 'com.nimbusds:oauth2-oidc-sdk:6.13'
+//	api 'org.slf4j:slf4j-api'
+
+	compileOnly 'javax.servlet:javax.servlet-api:4.0.1'
 
 	// lombok
 	compileOnly 'org.projectlombok:lombok'
