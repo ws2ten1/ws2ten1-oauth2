@@ -39,12 +39,12 @@ if (System.env.BINTRAY_USER && System.env.BINTRAY_KEY) {
 			repo = "maven-release"
 			name = project.name
 			desc = project.description
-			websiteUrl = "https://github.com/ws2ten1/ws2ten1-template"
-			issueTrackerUrl = "https://github.com/ws2ten1/ws2ten1-template/issues"
-			vcsUrl = "https://github.com/ws2ten1/ws2ten1-template.git"
+			websiteUrl = "https://github.com/ws2ten1/ws2ten1-oauth2"
+			issueTrackerUrl = "https://github.com/ws2ten1/ws2ten1-oauth2/issues"
+			vcsUrl = "https://github.com/ws2ten1/ws2ten1-oauth2.git"
 			licenses = ["Apache-2.0"]
 			labels = ["ws2ten1", "Spring framework"]
-			githubRepo = 'ws2ten1/ws2ten1-template'
+			githubRepo = 'ws2ten1/ws2ten1-oauth2'
 			version {
 				name = project.version
 				vcsTag = project.version
