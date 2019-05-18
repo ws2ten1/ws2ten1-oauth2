@@ -17,7 +17,10 @@ package org.ws2ten1.oauth2;
 
 import static org.springframework.security.oauth2.core.OAuth2AccessToken.TokenType;
 
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -36,11 +39,16 @@ public class DummyOpaqueTokenAuthenticationProvider implements AuthenticationPro
 			return null;
 		}
 		BearerTokenAuthenticationToken bearer = (BearerTokenAuthenticationToken) authentication;
+		String username = "dummy.user";
+		
+		Map<String, Object> attributes = new HashMap<>();
+		attributes.put("username", username);
+		attributes.put("scope", Arrays.asList("openid", "profile"));
 		
 		// construct token
 		OAuth2AccessToken token = new OAuth2AccessToken(TokenType.BEARER, bearer.getToken(), null, null);
 		AbstractAuthenticationToken result = new OAuth2IntrospectionAuthenticationToken(
-				token, Collections.emptyMap(), AuthorityUtils.NO_AUTHORITIES, "dummy.user");
+				token, attributes, AuthorityUtils.NO_AUTHORITIES, username);
 		result.setDetails(bearer.getDetails());
 		return result;
 	}
