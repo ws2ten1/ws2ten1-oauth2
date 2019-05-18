@@ -18,7 +18,6 @@ package org.ws2ten1.oauth2;
 import static org.springframework.security.oauth2.core.OAuth2AccessToken.TokenType;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
