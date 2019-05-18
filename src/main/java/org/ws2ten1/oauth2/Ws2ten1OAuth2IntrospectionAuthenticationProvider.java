@@ -19,12 +19,15 @@ import static org.springframework.security.oauth2.core.OAuth2AccessToken.TokenTy
 
 import java.net.URI;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -38,7 +41,6 @@ import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.core.OAuth2AccessToken;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
@@ -56,6 +58,10 @@ import com.nimbusds.oauth2.sdk.TokenIntrospectionSuccessResponse;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.id.Audience;
 
+/**
+ * @see org.springframework.security.oauth2.server.resource.authentication.OAuth2IntrospectionAuthenticationProvider
+ */
+@Slf4j
 public class Ws2ten1OAuth2IntrospectionAuthenticationProvider implements AuthenticationProvider {
 	
 	/**
@@ -281,17 +287,29 @@ public class Ws2ten1OAuth2IntrospectionAuthenticationProvider implements Authent
 	
 	@SuppressWarnings("unchecked")
 	private Collection<GrantedAuthority> extractAuthorities(Map<String, Object> claims) {
+		Collection<GrantedAuthority> result = new ArrayList<>();
 		try {
 			Collection<String> authorities = (Collection<String>) claims.get(AUTHORITIES);
-			if (authorities == null) {
-				return AuthorityUtils.NO_AUTHORITIES;
+			if (authorities != null) {
+				authorities.stream()
+					.map(SimpleGrantedAuthority::new)
+					.forEach(result::add);
 			}
-			return authorities.stream()
-				.map(SimpleGrantedAuthority::new)
-				.collect(Collectors.toSet());
 		} catch (ClassCastException e) {
-			return AuthorityUtils.NO_AUTHORITIES;
+			log.warn("Unexpected {} claim", AUTHORITIES, e);
 		}
+		
+		try {
+			Collection<String> scopes = (Collection<String>) claims.get(SCOPE);
+			if (scopes != null) {
+				scopes.stream()
+					.map(scope -> new SimpleGrantedAuthority("SCOPE_" + scope))
+					.forEach(result::add);
+			}
+		} catch (ClassCastException e) {
+			log.warn("Unexpected {} claim", SCOPE, e);
+		}
+		return result;
 	}
 	
 	private URI issuer(String uri) {
