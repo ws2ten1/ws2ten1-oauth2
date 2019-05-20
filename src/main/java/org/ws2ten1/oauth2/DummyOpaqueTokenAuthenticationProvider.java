@@ -21,16 +21,22 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.oauth2.core.OAuth2AccessToken;
+import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.server.resource.BearerTokenAuthenticationToken;
+import org.springframework.security.oauth2.server.resource.BearerTokenError;
 import org.springframework.security.oauth2.server.resource.authentication.OAuth2IntrospectionAuthenticationToken;
 
 public class DummyOpaqueTokenAuthenticationProvider implements AuthenticationProvider {
+	
+	public static String BAD_TOKEN = "bad-token";
+	
 	
 	@Override
 	public Authentication authenticate(Authentication authentication) throws AuthenticationException {
@@ -38,6 +44,11 @@ public class DummyOpaqueTokenAuthenticationProvider implements AuthenticationPro
 			return null;
 		}
 		BearerTokenAuthenticationToken bearer = (BearerTokenAuthenticationToken) authentication;
+		
+		if (bearer.getToken().equals(BAD_TOKEN)) {
+			throw new OAuth2AuthenticationException(invalidToken("Bad token"));
+		}
+		
 		String username = "dummy.user";
 		
 		Map<String, Object> attributes = new HashMap<>();
@@ -55,5 +66,11 @@ public class DummyOpaqueTokenAuthenticationProvider implements AuthenticationPro
 	@Override
 	public boolean supports(Class<?> authentication) {
 		return BearerTokenAuthenticationToken.class.isAssignableFrom(authentication);
+	}
+	
+	private static BearerTokenError invalidToken(String message) {
+		return new BearerTokenError("invalid_token",
+				HttpStatus.UNAUTHORIZED, message,
+				"https://tools.ietf.org/html/rfc7662#section-2.2");
 	}
 }
