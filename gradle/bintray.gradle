@@ -32,7 +32,7 @@ if (System.env.BINTRAY_USER && System.env.BINTRAY_KEY) {
 		user = System.env.BINTRAY_USER
 		key = System.env.BINTRAY_KEY
 		publications = ["mavenJava"]
-		dryRun = System.env.CIRCLE_BRANCH != "master"
+		dryRun = System.env.CIRCLE_TAG == null
 		publish = true
 		pkg {
 			userOrg = "ws2ten1"
