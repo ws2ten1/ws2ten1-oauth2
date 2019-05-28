@@ -109,6 +109,16 @@ public class Ws2ten1OAuth2IntrospectionAuthenticationProvider implements Authent
 	 */
 	private static final String AUTHORITIES = "authorities";
 	
+	
+	private static RestTemplate createDefaultRestOperations(String clientId, String clientSecret) {
+		Assert.notNull(clientId, "clientId cannot be null");
+		Assert.notNull(clientSecret, "clientSecret cannot be null");
+		RestTemplate restTemplate = new RestTemplate();
+		restTemplate.getInterceptors().add(new BasicAuthenticationInterceptor(clientId, clientSecret));
+		return restTemplate;
+	}
+	
+	
 	private URI introspectionUri;
 	
 	private RestOperations restOperations;
@@ -123,14 +133,7 @@ public class Ws2ten1OAuth2IntrospectionAuthenticationProvider implements Authent
 	 */
 	public Ws2ten1OAuth2IntrospectionAuthenticationProvider(String introspectionUri, String clientId,
 			String clientSecret) {
-		Assert.notNull(introspectionUri, "introspectionUri cannot be null");
-		Assert.notNull(clientId, "clientId cannot be null");
-		Assert.notNull(clientSecret, "clientSecret cannot be null");
-		
-		this.introspectionUri = URI.create(introspectionUri);
-		RestTemplate restTemplate = new RestTemplate();
-		restTemplate.getInterceptors().add(new BasicAuthenticationInterceptor(clientId, clientSecret));
-		this.restOperations = restTemplate;
+		this(introspectionUri, createDefaultRestOperations(clientId, clientSecret));
 	}
 	
 	/**
@@ -228,7 +231,10 @@ public class Ws2ten1OAuth2IntrospectionAuthenticationProvider implements Authent
 	
 	private HTTPResponse adaptToNimbusResponse(ResponseEntity<String> responseEntity) {
 		HTTPResponse response = new HTTPResponse(responseEntity.getStatusCodeValue());
-		response.setHeader(HttpHeaders.CONTENT_TYPE, responseEntity.getHeaders().getContentType().toString());
+		MediaType contentType = responseEntity.getHeaders().getContentType();
+		if (contentType != null) {
+			response.setHeader(HttpHeaders.CONTENT_TYPE, contentType.toString());
+		}
 		response.setContent(responseEntity.getBody());
 		
 		if (response.getStatusCode() != HTTPResponse.SC_OK) {
