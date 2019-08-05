@@ -67,7 +67,7 @@ dependencies {
 	api 'org.slf4j:slf4j-api'
 	api 'org.springframework:spring-web'
 	api 'org.springframework.security:spring-security-core:5.2.0.M3'
-	api 'org.springframework.security:spring-security-config:5.2.0.M3'
+	api 'org.springframework.security:spring-security-config:5.2.0.M4'
 	api 'org.springframework.security:spring-security-oauth2-core:5.2.0.M3'
 	api 'org.springframework.security:spring-security-oauth2-resource-server:5.2.0.M3'
 	implementation 'com.nimbusds:oauth2-oidc-sdk:6.14'
