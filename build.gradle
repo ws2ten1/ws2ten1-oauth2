@@ -70,7 +70,7 @@ dependencies {
 	api 'org.springframework.security:spring-security-config:5.2.1.RELEASE'
 	api 'org.springframework.security:spring-security-oauth2-core:5.2.1.RELEASE'
 	api 'org.springframework.security:spring-security-oauth2-resource-server:5.2.1.RELEASE'
-	implementation 'com.nimbusds:oauth2-oidc-sdk:6.18'
+	implementation 'com.nimbusds:oauth2-oidc-sdk:6.18.2'
 
 	compileOnly 'javax.servlet:javax.servlet-api:4.0.1'
 
