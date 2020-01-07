@@ -58,10 +58,10 @@ public class DummyOpaqueTokenAuthenticationProvider implements AuthenticationPro
 		BearerTokenAuthenticationToken bearerTokenAuthentication = (BearerTokenAuthenticationToken) authentication;
 		String token = bearerTokenAuthentication.getToken();
 		try {
-			String[] split = token.split(":");
+			String[] split = token.split("/");
 			String username = split[0];
-			Collection<GrantedAuthority> authorities = AuthorityUtils.commaSeparatedStringToAuthorityList(split[1]);
-			Set<String> scope = new HashSet<>(Arrays.asList(split[2].split(",")));
+			Collection<GrantedAuthority> authorities = AuthorityUtils.createAuthorityList(split[1].split("\\+"));
+			Set<String> scope = new HashSet<>(Arrays.asList(split[2].split("\\+")));
 			Instant iat = Instant.ofEpochMilli(Long.parseLong(split[3]));
 			Instant exp = Instant.ofEpochMilli(Long.parseLong(split[3]) + Long.parseLong(split[4]));
 			
