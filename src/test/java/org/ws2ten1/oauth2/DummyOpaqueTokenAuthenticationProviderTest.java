@@ -63,7 +63,13 @@ public class DummyOpaqueTokenAuthenticationProviderTest {
 	public void testAuthenticate_active_authenticated() {
 		// setup
 		long now = Instant.now().toEpochMilli();
-		String token = "example-user/ROLE_ADMIN+ROLE_USER/openid+profile/" + now + "/300000";
+		String token = DummyOpaqueTokenAuthenticationProvider.createDummyToken("example-user", new String[] {
+			"ROLE_ADMIN",
+			"ROLE_USER",
+		}, new String[] {
+			"openid",
+			"profile",
+		}, now, 300000);
 		Authentication authentication = new BearerTokenAuthenticationToken(token);
 		// exercise
 		Authentication actual = sut.authenticate(authentication);

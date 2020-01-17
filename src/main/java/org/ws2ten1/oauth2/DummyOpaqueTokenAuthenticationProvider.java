@@ -18,14 +18,19 @@ package org.ws2ten1.oauth2;
 import static org.springframework.security.oauth2.server.resource.introspection.OAuth2IntrospectionClaimNames.EXPIRES_AT;
 import static org.springframework.security.oauth2.server.resource.introspection.OAuth2IntrospectionClaimNames.ISSUED_AT;
 
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.http.HttpStatus;
@@ -42,6 +47,9 @@ import org.springframework.security.oauth2.server.resource.BearerTokenAuthentica
 import org.springframework.security.oauth2.server.resource.BearerTokenError;
 import org.springframework.security.oauth2.server.resource.authentication.BearerTokenAuthentication;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 @Slf4j
 public class DummyOpaqueTokenAuthenticationProvider implements AuthenticationProvider {
 	
@@ -49,6 +57,27 @@ public class DummyOpaqueTokenAuthenticationProvider implements AuthenticationPro
 			HttpStatus.UNAUTHORIZED, "An error occurred while attempting to introspect the token: Invalid token",
 			"https://tools.ietf.org/html/rfc7662#section-2.2");
 	
+	private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+	
+	
+	public static String createDummyToken(String username, String[] authorities, String[] scopes, long iat, long exp) {
+		TokenData data = new TokenData(username, authorities, scopes, iat, exp);
+		try {
+			String tokenData = OBJECT_MAPPER.writeValueAsString(data);
+			return Base64.getEncoder().encodeToString(tokenData.getBytes(StandardCharsets.UTF_8));
+		} catch (JsonProcessingException e) {
+			throw new AssertionError(e);
+		}
+	}
+	
+	private static TokenData decode(String token) {
+		try {
+			String tokenData = new String(Base64.getDecoder().decode(token), StandardCharsets.UTF_8);
+			return OBJECT_MAPPER.readValue(tokenData, TokenData.class);
+		} catch (JsonProcessingException e) {
+			throw new IllegalArgumentException(e);
+		}
+	}
 	
 	@Override
 	public Authentication authenticate(Authentication authentication) throws AuthenticationException {
@@ -56,32 +85,31 @@ public class DummyOpaqueTokenAuthenticationProvider implements AuthenticationPro
 			return null;
 		}
 		BearerTokenAuthenticationToken bearerTokenAuthentication = (BearerTokenAuthenticationToken) authentication;
-		String token = bearerTokenAuthentication.getToken();
+		
 		try {
-			String[] split = token.split("/");
-			String username = split[0];
-			Collection<GrantedAuthority> authorities = AuthorityUtils.createAuthorityList(split[1].split("\\+"));
-			Set<String> scope = new HashSet<>(Arrays.asList(split[2].split("\\+")));
-			Instant iat = Instant.ofEpochMilli(Long.parseLong(split[3]));
-			Instant exp = Instant.ofEpochMilli(Long.parseLong(split[3]) + Long.parseLong(split[4]));
+			TokenData token = decode(bearerTokenAuthentication.getToken());
+			Collection<GrantedAuthority> authorities = AuthorityUtils.createAuthorityList(token.getAuthorities());
+			Set<String> scope = new HashSet<>(Arrays.asList(token.getScopes()));
+			Instant iat = Instant.ofEpochMilli(token.getIat());
+			Instant exp = Instant.ofEpochMilli(token.getIat() + token.getExp());
 			
 			Map<String, Object> attributes = new HashMap<>();
-			attributes.put("username", username);
+			attributes.put("username", token.getUsername());
 			attributes.put("scope", scope);
 			attributes.put(ISSUED_AT, iat);
 			attributes.put(EXPIRES_AT, exp);
 			
 			// construct token
 			OAuth2AuthenticatedPrincipal principal =
-					new DefaultOAuth2AuthenticatedPrincipal(username, attributes, authorities);
-			OAuth2AccessToken accessToken =
-					new OAuth2AccessToken(OAuth2AccessToken.TokenType.BEARER, token, iat, exp, scope);
+					new DefaultOAuth2AuthenticatedPrincipal(token.getUsername(), attributes, authorities);
+			OAuth2AccessToken accessToken = new OAuth2AccessToken(
+					OAuth2AccessToken.TokenType.BEARER, bearerTokenAuthentication.getToken(), iat, exp, scope);
 			BearerTokenAuthentication result = new BearerTokenAuthentication(principal, accessToken, authorities);
 			result.setDetails(bearerTokenAuthentication.getDetails());
 			return result;
-		} catch (ArrayIndexOutOfBoundsException | NumberFormatException e) {
+		} catch (IllegalArgumentException | ArrayIndexOutOfBoundsException e) {
 			// New exception is thrown in catch block, original stack trace may be lost
-			log.error("Failed to parse dummy token: {}", token, e);
+			log.error("Failed to parse dummy token: {}", bearerTokenAuthentication.getToken(), e);
 			throw new OAuth2AuthenticationException(DEFAULT_INVALID_TOKEN); // NOPMD
 		}
 	}
@@ -89,5 +117,22 @@ public class DummyOpaqueTokenAuthenticationProvider implements AuthenticationPro
 	@Override
 	public boolean supports(Class<?> authentication) {
 		return BearerTokenAuthenticationToken.class.isAssignableFrom(authentication);
+	}
+	
+	
+	@Data
+	@AllArgsConstructor
+	@NoArgsConstructor
+	private static class TokenData {
+		
+		private String username;
+		
+		private String[] authorities;
+		
+		private String[] scopes;
+		
+		private long iat;
+		
+		private long exp;
 	}
 }

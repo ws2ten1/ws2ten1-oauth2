@@ -72,6 +72,7 @@ dependencies {
 	api 'org.springframework.security:spring-security-oauth2-resource-server:5.2.1.RELEASE'
 	implementation 'org.springframework.security:spring-security-oauth2-jose'
 	implementation 'com.nimbusds:oauth2-oidc-sdk:6.23'
+	implementation 'com.fasterxml.jackson.core:jackson-databind'
 
 	compileOnly 'javax.servlet:javax.servlet-api:4.0.1'
 
