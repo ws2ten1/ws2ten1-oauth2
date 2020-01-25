@@ -1,66 +1,53 @@
-buildscript {
-	repositories {
-		jcenter()
-		mavenCentral()
-		maven { url "https://plugins.gradle.org/m2/" }
-	}
-	dependencies {
-		classpath 'com.diffplug.spotless:spotless-plugin-gradle:3.27.1'
-		classpath 'de.thetaphi:forbiddenapis:2.7'
-		classpath 'de.aaschmid:gradle-cpd-plugin:3.1'
-		classpath 'com.github.spotbugs:spotbugs-gradle-plugin:3.0.0'
-	}
-}
+// ================
+// Gradle configuration
 
 plugins {
 	id 'java-library'
+	id 'maven-publish'
 	id 'org.springframework.boot' version '2.2.4.RELEASE'
 	id 'com.jfrog.bintray' version '1.8.4'
-	id 'maven-publish'
+
+	// https://github.com/palantir/gradle-git-version
+	id 'com.palantir.git-version' version '0.12.2'
+
+	// code quality plugins
+	id 'checkstyle'
+	id 'pmd'
+	id 'jacoco'
 	id 'com.github.spotbugs' version '3.0.0' apply false
+	id 'de.thetaphi.forbiddenapis' version '2.7'
+	id 'de.aaschmid.cpd' version '3.1'
+	id 'com.diffplug.gradle.spotless' version '3.27.1'
 }
 
-// basic plugins
-apply plugin: 'io.spring.dependency-management'
+wrapper {
+	gradleVersion = '6.0.1'
+	distributionType = Wrapper.DistributionType.ALL
+}
 
-// code quality plugins
-apply plugin: "checkstyle"
-apply plugin: "com.github.spotbugs"
-apply plugin: "pmd"
-apply plugin: "cpd"
-apply plugin: "jacoco"
-apply plugin: "de.thetaphi.forbiddenapis"
-apply plugin: "com.diffplug.gradle.spotless"
-
-// code quality configuration
-apply from: "${rootProject.projectDir}/config/checkstyle.gradle"
-apply from: "${rootProject.projectDir}/config/spotbugs.gradle"
-apply from: "${rootProject.projectDir}/config/pmd.gradle"
-apply from: "${rootProject.projectDir}/config/cpd.gradle"
-apply from: "${rootProject.projectDir}/config/jacoco.gradle"
-apply from: "${rootProject.projectDir}/config/forbiddenapis.gradle"
-apply from: "${rootProject.projectDir}/config/spotless.gradle"
-
-// custom configuration
-apply from: "${rootProject.projectDir}/gradle/version.gradle"
-apply from: "${rootProject.projectDir}/gradle/sourceArtifact.gradle"
-apply from: "${rootProject.projectDir}/gradle/bintray.gradle"
+// ================
+// Project metadata configuration
 
 group = 'org.polycreo'
+version = gitVersion()
 
-// compiler
-sourceCompatibility = '1.8'
+// ================
+// Build configuration
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
 
 compileJava {
-	options.compilerArgs << "-Werror"
-	options.compilerArgs << "-Xlint:all" << "-Xlint:-processing" << "-Xlint:-deprecation"
+	options.compilerArgs << '-Werror'
+	options.compilerArgs << '-Xlint:all' << '-Xlint:-processing' << '-Xlint:-deprecation'
 }
+
+apply plugin: 'io.spring.dependency-management'
 
 repositories {
 	jcenter()
 	mavenCentral()
 	maven { url 'https://dl.bintray.com/polycreo/maven' }
-	maven { url 'http://repo.spring.io/milestone' }
 }
 
 dependencies {
@@ -94,13 +81,38 @@ jar {
 	enabled = true
 }
 
+// ================
+// Lint / Test configuration
+
+apply from: "${rootProject.projectDir}/config/checkstyle.gradle"
+apply from: "${rootProject.projectDir}/config/spotbugs.gradle"
+apply from: "${rootProject.projectDir}/config/pmd.gradle"
+apply from: "${rootProject.projectDir}/config/cpd.gradle"
+apply from: "${rootProject.projectDir}/config/jacoco.gradle"
+apply from: "${rootProject.projectDir}/config/forbiddenapis.gradle"
+apply from: "${rootProject.projectDir}/config/spotless.gradle"
+
 tasks.withType(com.github.spotbugs.SpotBugsTask) {
 	reports {
-		html {
-			enabled = true
-		}
-		xml {
-			enabled = false
-		}
+		html.enabled = true
+		xml.enabled = false
 	}
 }
+
+tasks.withType(Test) {
+	exclude "**/*\$*", "**/*Tests.class", "**/examples/**"
+	reports {
+		html.enabled = true
+		junitXml.outputPerTestCase = false
+	}
+	testLogging.exceptionFormat = 'full'
+	beforeTest {
+		logger.lifecycle("{} > {}", it.parent.name, it.name)
+	}
+}
+
+// ================
+// Deploy configuration
+
+apply from: "${rootProject.projectDir}/gradle/sourceArtifact.gradle"
+apply from: "${rootProject.projectDir}/gradle/publish.gradle"
