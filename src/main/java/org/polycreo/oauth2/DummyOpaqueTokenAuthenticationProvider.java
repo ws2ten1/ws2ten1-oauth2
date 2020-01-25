@@ -80,7 +80,7 @@ public class DummyOpaqueTokenAuthenticationProvider implements AuthenticationPro
 	}
 	
 	@Override
-	public Authentication authenticate(Authentication authentication) throws AuthenticationException {
+	public Authentication authenticate(Authentication authentication) {
 		if (authentication instanceof BearerTokenAuthenticationToken == false) {
 			return null;
 		}
