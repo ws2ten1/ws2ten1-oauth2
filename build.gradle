@@ -46,7 +46,7 @@ apply from: "${rootProject.projectDir}/gradle/version.gradle"
 apply from: "${rootProject.projectDir}/gradle/sourceArtifact.gradle"
 apply from: "${rootProject.projectDir}/gradle/bintray.gradle"
 
-group = 'org.ws2ten1'
+group = 'org.polycreo'
 
 // compiler
 sourceCompatibility = '1.8'
@@ -59,7 +59,7 @@ compileJava {
 repositories {
 	jcenter()
 	mavenCentral()
-	maven { url 'https://dl.bintray.com/ws2ten1/maven-release' }
+	maven { url 'https://dl.bintray.com/polycreo/maven' }
 	maven { url 'http://repo.spring.io/milestone' }
 }
 
