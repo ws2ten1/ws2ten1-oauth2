@@ -102,8 +102,8 @@ public class DummyOpaqueTokenAuthenticationProvider implements AuthenticationPro
 			// construct token
 			OAuth2AuthenticatedPrincipal principal =
 					new DefaultOAuth2AuthenticatedPrincipal(token.getUsername(), attributes, authorities);
-			OAuth2AccessToken accessToken = new OAuth2AccessToken(
-					OAuth2AccessToken.TokenType.BEARER, bearerTokenAuthentication.getToken(), iat, exp, scope);
+			OAuth2AccessToken accessToken = new OAuth2AccessToken(OAuth2AccessToken.TokenType.BEARER,
+					bearerTokenAuthentication.getToken(), iat, exp, scope);
 			BearerTokenAuthentication result = new BearerTokenAuthentication(principal, accessToken, authorities);
 			result.setDetails(bearerTokenAuthentication.getDetails());
 			return result;
