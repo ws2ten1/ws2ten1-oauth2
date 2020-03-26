@@ -8,7 +8,7 @@ plugins {
 	id 'com.jfrog.bintray' version '1.8.4'
 
 	// https://github.com/palantir/gradle-git-version
-	id 'com.palantir.git-version' version '0.12.2'
+	id 'com.palantir.git-version' version '0.12.3'
 
 	// code quality plugins
 	id 'checkstyle'
