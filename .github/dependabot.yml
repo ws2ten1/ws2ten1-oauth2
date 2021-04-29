@@ -1,0 +1,67 @@
+version: 2
+updates:
+- package-ecosystem: gradle
+  directory: "/"
+  schedule:
+    interval: daily
+    time: "20:00"
+  open-pull-requests-limit: 10
+  assignees:
+  - dai0304
+  ignore:
+  - dependency-name: com.nimbusds:oauth2-oidc-sdk
+    versions:
+    - "8.35"
+    - "8.36"
+    - "9.0"
+    - "9.1"
+    - "9.2"
+    - 9.2.1
+    - 9.2.2
+    - 9.2.3
+    - 9.2.4
+    - "9.3"
+    - 9.3.1
+    - 9.3.3
+    - "9.4"
+  - dependency-name: com.diffplug.gradle.spotless
+    versions:
+    - 5.10.0
+    - 5.10.1
+    - 5.10.2
+    - 5.11.0
+    - 5.11.1
+    - 5.12.0
+    - 5.12.1
+    - 5.9.0
+  - dependency-name: org.springframework.boot
+    versions:
+    - 2.4.2
+    - 2.4.3
+    - 2.4.4
+  - dependency-name: com.github.spotbugs
+    versions:
+    - 4.6.0
+    - 4.6.1
+    - 4.6.2
+    - 4.7.0
+  - dependency-name: org.springframework.security:spring-security-core
+    versions:
+    - 5.4.2
+    - 5.4.4
+    - 5.4.5
+  - dependency-name: org.springframework.security:spring-security-oauth2-core
+    versions:
+    - 5.4.2
+    - 5.4.4
+    - 5.4.5
+  - dependency-name: org.springframework.security:spring-security-config
+    versions:
+    - 5.4.2
+    - 5.4.4
+    - 5.4.5
+  - dependency-name: org.springframework.security:spring-security-oauth2-resource-server
+    versions:
+    - 5.4.2
+    - 5.4.4
+    - 5.4.5
